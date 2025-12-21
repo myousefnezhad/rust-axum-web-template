@@ -1,0 +1,29 @@
+[package]
+name = "app"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+awc = { workspace = true }
+axum = { workspace = true }
+sqlx = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+hyper = { workspace = true }
+tower = { workspace = true }
+dotenv = { workspace = true }
+anyhow = { workspace = true }
+futures = { workspace = true }
+tracing = { workspace = true }
+app_log = { workspace = true }
+app_route = { workspace = true }
+app_config = { workspace = true }
+serde_json = { workspace = true }
+hyper-util = { workspace = true }
+tokio-util = { workspace = true }
+async-trait = { workspace = true }
+app_state = { workspace = true }
+app_middleware = { workspace = true }
+http-body-util = { workspace = true }
+tracing-subscriber = { workspace = true }
+

@@ -1,0 +1,14 @@
+{
+  "backend_bind": "0.0.0.0:9000",
+  "backend_workers": 10,
+  "log_level": "Debug",
+  "pg_connection": 10,
+  "redis_url": "redis://127.0.0.1:6379",
+  "redis_session": 2592000,
+  "jwt_access_key": "<KEY>",
+  "jwt_access_session_minutes": 120,
+  "jwt_refresh_key": "<KEY>",
+  "jwt_refresh_session_days": 365,
+  "rsa_private_key": "/rsa_key",
+  "rsa_public_key": "/rsa_key.pub"
+}
