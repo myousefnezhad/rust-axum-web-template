@@ -1,14 +1,11 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+use app_config::AppConfig;
+use deadpool_redis::Pool as RedisPool;
+use sqlx::Pool as PostgresPool;
+use sqlx::postgres::Postgres;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+#[derive(Clone)]
+pub struct AppState {
+    pub config: AppConfig,
+    pub pg: PostgresPool<Postgres>,
+    pub redis: RedisPool,
 }
