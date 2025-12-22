@@ -8,7 +8,6 @@ members = [
   "libraries/log",
   "libraries/middleware",
   "libraries/redis",
-  "libraries/route",
   "libraries/schema",
   "services/app",  
 ]
@@ -67,5 +66,4 @@ app_log = { path = "./libraries/log", package = "log" }
 app_state = { path = "./libraries/app_state", package = "app_state" }
 app_middleware = { path = "./libraries/middleware", package = "middleware" }
 app_redis = { path = "./libraries/redis", package = "redis" }
-app_route = { path = "./libraries/route", package = "route" }
 app_schema = { path = "./libraries/schema", package = "schema" }

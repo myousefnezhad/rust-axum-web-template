@@ -1,8 +1,6 @@
-use app_config::AppConfig;
-use dotenv::dotenv;
+use app::app_service;
 
-fn main() {
-    dotenv().ok();
-    let config = AppConfig::new();
-    println!("{:#?}", &config);
+#[tokio::main]
+async fn main() {
+    app_service().await;
 }
