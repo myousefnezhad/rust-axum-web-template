@@ -4,3 +4,15 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
+rsa = { workspace = true }
+log = { workspace = true }
+axum = { workspace = true }
+sqlx = { workspace = true }
+rand = { workspace = true }
+serde = { workspace = true }
+bcrypt = { workspace = true }
+base64-url = { workspace = true }
+serde_json = { workspace = true }
+derive_more = { workspace = true }
+jsonwebtoken = { workspace = true }
+deadpool-redis = { workspace = true }

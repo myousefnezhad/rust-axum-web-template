@@ -12,3 +12,10 @@ pub struct User {
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
+
+impl User {
+    #[inline]
+    pub fn select_query() -> &'static str {
+        include_str!("../../../../SQL/auth/users/select_base.sql")
+    }
+}

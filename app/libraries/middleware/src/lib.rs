@@ -89,7 +89,7 @@ pub async fn web_auth_middleware(
                     let access_claim = Claims {
                         iat,
                         exp,
-                        id: refresh_claim.id,
+                        id: refresh_claim.id.clone(),
                         name: refresh_claim.name.clone(),
                         email: refresh_claim.email.clone(),
                         session: refresh_claim.session,
@@ -126,8 +126,7 @@ fn add_req_headers(req: &mut Request, claim: &Claims, access_token: &str) {
     );
     let _ = req.headers_mut().insert(
         "x-auth-id",
-        HeaderValue::from_str(&claim.id.to_string())
-            .unwrap_or_else(|_| HeaderValue::from_static("")),
+        HeaderValue::from_str(&claim.id).unwrap_or_else(|_| HeaderValue::from_static("")),
     );
     let _ = req.headers_mut().insert(
         "x-auth-session",

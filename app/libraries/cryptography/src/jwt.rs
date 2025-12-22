@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 pub struct Claims {
     pub exp: i64,
     pub iat: i64,
-    pub id: i64,
+    pub id: String,
     pub name: String,
     pub email: String,
     pub session: u64,
@@ -18,12 +18,10 @@ pub struct Claims {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct RedisInfo {
-    pub id: i64,
+    pub id: String,
     pub name: String,
     pub email: String,
     pub session: u64,
-    pub address: String,
-    pub browser: String,
     pub token: String,
 }
 
@@ -57,13 +55,13 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use lib_config::AppConfig;
+    use app_config::AppConfig;
     #[test]
     fn check_jwt_functions() {
         let mut my_claim = Claims {
             exp: i64::MAX,
             iat: 0,
-            id: 0,
+            id: "".to_owned(),
             name: "test".to_owned(),
             email: "test@unit".to_owned(),
             session: 1,
