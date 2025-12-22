@@ -2321,6 +2321,12 @@ dependencies = [
 [[package]]
 name = "schema"
 version = "0.1.0"
+dependencies = [
+ "chrono",
+ "serde",
+ "sqlx",
+ "tokio",
+]
 
 [[package]]
 name = "scopeguard"
