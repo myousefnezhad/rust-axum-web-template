@@ -15,7 +15,6 @@ pub async fn app_service() {
     dotenv().ok();
     let config = AppConfig::new();
     let bind = config.backend_bind.clone();
-    let workers = config.backend_workers;
     let pg_connection = config.pg_connection;
     let redis_url = config.redis_url.clone();
     init_tracing(config.log_level.clone());
@@ -43,8 +42,11 @@ pub async fn app_service() {
         pg,
         redis,
     });
+    // Loading Routes
     let routes = routers(app_state);
+    // Setup TCP Port
     let tcp_listener = tokio::net::TcpListener::bind(&bind).await.unwrap();
+    // Running Server ...
     info!("Serving web server on {}", &bind);
     let _ = axum::serve(tcp_listener, routes).await;
 }
