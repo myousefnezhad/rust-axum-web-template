@@ -15,6 +15,8 @@ use chrono::{Duration, Utc};
 use rand::Rng;
 use std::sync::Arc;
 
+const AUTH_FAILD_MESSAGE: &'static str = "Provided information is wrong!";
+
 pub async fn post_login(
     State(state): State<Arc<AppState>>,
     Json(args): Json<PostLoginInput>,
@@ -29,19 +31,20 @@ pub async fn post_login(
     let jwt_refresh_session_day = config.jwt_refresh_session_days;
     // Search for user
     let user_info =
-        sqlx::query_as::<_, User>(&format!("{} WHRER email = $1", User::select_query()))
+        match sqlx::query_as::<_, User>(&format!("{} WHERE email = $1", User::select_query()))
             .bind(&args.email)
-            .fetch_one(&pg)
-            .await?;
-
+            .fetch_optional(&pg)
+            .await?
+        {
+            Some(user) => user,
+            None => {
+                return Err(AppError::new(AUTH_FAILD_MESSAGE, StatusCode::FORBIDDEN, 2));
+            }
+        };
     if !verify(&args.password, &user_info.password_hash)? {
-        return Err(AppError::new(
-            "Password is not matched".to_owned(),
-            StatusCode::FORBIDDEN,
-            2,
-        ));
+        return Err(AppError::new(AUTH_FAILD_MESSAGE, StatusCode::FORBIDDEN, 2));
     }
-
+    // User authentication is successed, generating login
     // Access Token
     let session: u64 = {
         let mut rng = rand::thread_rng();
@@ -60,7 +63,6 @@ pub async fn post_login(
         email: email.clone(),
         session,
     };
-
     // Refresh Token
     let exp = (Utc::now() + Duration::days(jwt_refresh_session_day)).timestamp();
     let refresh_claim = Claims {
