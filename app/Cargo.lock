@@ -1724,6 +1724,7 @@ dependencies = [
  "axum",
  "chrono",
  "cryptography",
+ "error",
  "jsonwebtoken",
  "redis 0.1.0",
  "serde",

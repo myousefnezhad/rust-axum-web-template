@@ -7,8 +7,6 @@ CREATE TABLE IF NOT EXISTS auth.users (
     email           TEXT NOT NULL UNIQUE,
     name            TEXT NOT NULL,
     password_hash   TEXT NOT NULL,
-    is_active       BOOLEAN NOT NULL DEFAULT TRUE,
-    is_verified     BOOLEAN NOT NULL DEFAULT FALSE,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

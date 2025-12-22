@@ -1,12 +1,12 @@
 use app_cryptography::jwt::{Algorithm, Claims, RedisInfo, generate_token, validate_token};
+use app_error::AppError;
 use app_redis::Redis;
 use app_state::AppState;
 use axum::{
-    body::Body,
     extract::{Request, State},
     http::{HeaderValue, StatusCode, header::AUTHORIZATION},
     middleware::Next,
-    response::Response,
+    response::{IntoResponse, Response},
 };
 use chrono::{Duration, Utc};
 use std::sync::Arc;
@@ -28,13 +28,8 @@ pub async fn web_auth_middleware(
     let jwt_access_key = config.jwt_access_key.clone();
     let jwt_access_session_minutes = config.jwt_access_session_minutes;
     let jwt_refresh_key = config.jwt_refresh_key.clone();
-
-    let unauthorized = || {
-        Response::builder()
-            .status(StatusCode::UNAUTHORIZED)
-            .body(Body::from("Unauthorized"))
-            .unwrap()
-    };
+    let unauthorized =
+        || AppError::new("Unauthorized", StatusCode::UNAUTHORIZED, 0).into_response();
 
     // IMPORTANT: make the header value owned so we don't keep borrowing `req`
     let auth_header: String = match req
@@ -47,7 +42,7 @@ pub async fn web_auth_middleware(
         None => return unauthorized(),
     };
 
-    // Expect: "Bearer <access_token> <refresh_token>"
+    // Expect: "Authorization: Bearer <access_token> <refresh_token>"
     let parts: Vec<&str> = auth_header.split_whitespace().collect();
     if parts.len() != 3 || !parts[0].eq_ignore_ascii_case("bearer") {
         return unauthorized();

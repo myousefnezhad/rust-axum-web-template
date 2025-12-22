@@ -10,6 +10,7 @@ chrono = { workspace = true }
 tracing = { workspace = true }
 app_state = { workspace = true }
 app_redis = { workspace = true }
+app_error = { workspace = true }
 serde_json = { workspace = true }
 jsonwebtoken = { workspace = true }
 app_cryptography = { workspace = true }
