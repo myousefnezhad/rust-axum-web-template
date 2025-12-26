@@ -4,7 +4,7 @@ use app_redis::Redis;
 use app_state::AppState;
 use axum::{
     extract::{Request, State},
-    http::{HeaderValue, StatusCode, header::AUTHORIZATION},
+    http::{HeaderMap, HeaderValue, StatusCode, header::AUTHORIZATION},
     middleware::Next,
     response::{IntoResponse, Response},
 };
@@ -140,22 +140,24 @@ fn add_res_headers(res: &mut Response, access_token: &str) {
     );
 }
 
-pub fn get_email(req: &Request) -> Option<String> {
-    req.headers()
+pub fn get_email(headers: &HeaderMap) -> Option<String> {
+    headers
         .get("x-auth-email")
         .and_then(|v| v.to_str().ok())
         .map(|s| s.to_string())
 }
 
-pub fn get_session(req: &Request) -> Option<i64> {
-    match req
-        .headers()
-        .get("x-auth-session")
-        .and_then(|v| v.to_str().ok())
-    {
+pub fn get_session(headers: &HeaderMap) -> Option<u64> {
+    match headers.get("x-auth-session").and_then(|v| v.to_str().ok()) {
         None => None,
-        Some(x) => match x.parse::<i64>() {
-            Err(_) => None,
+        Some(x) => match x.parse::<u64>() {
+            Err(e) => {
+                error!(
+                    "Middleware cannot parse session information from header. {:?}",
+                    &e
+                );
+                None
+            }
             Ok(x) => Some(x),
         },
     }

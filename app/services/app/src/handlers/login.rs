@@ -9,12 +9,13 @@ use app_redis::Redis;
 use app_schema::auth::users::User;
 use app_state::AppState;
 use axum::{
-    extract::{Json, Request, State},
-    http::StatusCode,
+    extract::{Json, State},
+    http::{HeaderMap, StatusCode},
 };
 use chrono::{Duration, Utc};
 use rand::Rng;
 use std::sync::Arc;
+use tracing::error;
 
 const AUTH_FAILD_MESSAGE: &'static str = "Provided information is wrong!";
 
@@ -95,18 +96,20 @@ pub async fn post_login(
 }
 
 pub async fn post_logout(
+    headers: HeaderMap,
     State(state): State<Arc<AppState>>,
-    req: Request,
 ) -> Result<StatusCode, AppError> {
     let redis = state.redis.clone();
-    let email = match get_email(&req) {
+    let email = match get_email(&headers) {
         None => {
+            error!("Email header not found!");
             return Err(AppError::internal(AUTH_FAILD_MESSAGE));
         }
         Some(e) => e,
     };
-    let session = match get_session(&req) {
+    let session = match get_session(&headers) {
         None => {
+            error!("Session header not found!");
             return Err(AppError::internal(AUTH_FAILD_MESSAGE));
         }
         Some(s) => s,

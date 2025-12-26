@@ -1,11 +1,13 @@
 use app_cryptography::hash::{hash, verify};
 use app_dto::auth::user::{PatchChangePasswordInput, PostUserInput};
 use app_error::AppError;
+use app_middleware::get_session;
+use app_redis::Redis;
 use app_schema::auth::users::User;
 use app_state::AppState;
 use axum::{
     extract::{Json, State},
-    http::StatusCode,
+    http::{HeaderMap, StatusCode},
 };
 use std::sync::Arc;
 use tracing::*;
@@ -38,10 +40,12 @@ pub async fn post_user(
 }
 
 pub async fn patch_change_password(
+    headers: HeaderMap,
     State(state): State<Arc<AppState>>,
     Json(args): Json<PatchChangePasswordInput>,
 ) -> Result<StatusCode, AppError> {
     let pg = state.pg.clone();
+    let redis = state.redis.clone();
     // Search for user
     let user_info =
         match sqlx::query_as::<_, User>(&format!("{} WHERE email = $1", User::select_query()))
@@ -66,6 +70,15 @@ pub async fn patch_change_password(
         .bind(&args.email)
         .execute(&pg)
         .await?;
-    // TODO: You may want to clean redis here
+    // Clean Redis login sessions
+    let session = match get_session(&headers) {
+        None => {
+            return Err(AppError::internal(
+                "Password has been changed, but session information is worng!",
+            ));
+        }
+        Some(s) => s,
+    };
+    let _ = Redis::del(&redis, vec![&format!("{}:{}", &args.email, &session)]).await?;
     Ok(StatusCode::ACCEPTED)
 }
