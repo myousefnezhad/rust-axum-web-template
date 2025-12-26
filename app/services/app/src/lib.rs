@@ -1,7 +1,7 @@
 pub mod handlers;
 pub mod routings;
 
-use crate::routings::routers;
+use crate::routings::router;
 use app_config::AppConfig;
 use app_log::init_tracing;
 use app_redis::Redis;
@@ -43,7 +43,7 @@ pub async fn app_service() {
         redis,
     });
     // Loading Routes
-    let routes = routers(app_state);
+    let routes = router(app_state);
     // Setup TCP Port
     let tcp_listener = tokio::net::TcpListener::bind(&bind).await.unwrap();
     // Running Server ...

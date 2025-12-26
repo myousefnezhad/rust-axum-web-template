@@ -22,4 +22,8 @@ impl User {
     pub fn insert_query() -> &'static str {
         include_str!("../../../../SQL/auth/users/insert_query.sql")
     }
+    #[inline]
+    pub fn change_password_query() -> &'static str {
+        include_str!("../../../../SQL/auth/users/change_password.sql")
+    }
 }
