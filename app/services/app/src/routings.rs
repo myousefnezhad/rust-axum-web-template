@@ -17,6 +17,7 @@ pub fn router(state: Arc<AppState>) -> Router {
             "/auth",
             Router::new()
                 .route("/ping", get(ping).post(ping))
+                .route("/logout", post(post_logout))
                 .route("/user", get(get_user).post(post_user))
                 .route("/change_password", patch(patch_change_password))
                 .layer(middleware::from_fn_with_state(

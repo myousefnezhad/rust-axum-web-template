@@ -4,11 +4,12 @@ use app_cryptography::{
 };
 use app_dto::auth::login::{PostLoginInput, PostLoginOutput};
 use app_error::AppError;
+use app_middleware::{get_email, get_session};
 use app_redis::Redis;
 use app_schema::auth::users::User;
 use app_state::AppState;
 use axum::{
-    extract::{Json, State},
+    extract::{Json, Request, State},
     http::StatusCode,
 };
 use chrono::{Duration, Utc};
@@ -91,4 +92,25 @@ pub async fn post_login(
         access_token,
         refresh_token,
     }))
+}
+
+pub async fn post_logout(
+    State(state): State<Arc<AppState>>,
+    req: Request,
+) -> Result<StatusCode, AppError> {
+    let redis = state.redis.clone();
+    let email = match get_email(&req) {
+        None => {
+            return Err(AppError::internal(AUTH_FAILD_MESSAGE));
+        }
+        Some(e) => e,
+    };
+    let session = match get_session(&req) {
+        None => {
+            return Err(AppError::internal(AUTH_FAILD_MESSAGE));
+        }
+        Some(s) => s,
+    };
+    let _ = Redis::del(&redis, vec![&format!("{}:{}", &email, &session)]).await?;
+    Ok(StatusCode::OK)
 }

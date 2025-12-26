@@ -105,7 +105,6 @@ pub async fn web_auth_middleware(
             }
         }
     }
-
     unauthorized()
 }
 
@@ -139,4 +138,25 @@ fn add_res_headers(res: &mut Response, access_token: &str) {
         "x-auth-access-token",
         HeaderValue::from_str(access_token).unwrap_or_else(|_| HeaderValue::from_static("")),
     );
+}
+
+pub fn get_email(req: &Request) -> Option<String> {
+    req.headers()
+        .get("x-auth-email")
+        .and_then(|v| v.to_str().ok())
+        .map(|s| s.to_string())
+}
+
+pub fn get_session(req: &Request) -> Option<i64> {
+    match req
+        .headers()
+        .get("x-auth-session")
+        .and_then(|v| v.to_str().ok())
+    {
+        None => None,
+        Some(x) => match x.parse::<i64>() {
+            Err(_) => None,
+            Ok(x) => Some(x),
+        },
+    }
 }
