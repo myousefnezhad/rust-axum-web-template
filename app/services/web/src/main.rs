@@ -1,4 +1,4 @@
-use app::app_service;
+use web::app_service;
 
 #[tokio::main]
 async fn main() {

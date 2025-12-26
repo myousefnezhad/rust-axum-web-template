@@ -10,7 +10,8 @@ members = [
   "libraries/middleware",
   "libraries/redis",
   "libraries/schema",
-  "services/app",  
+  "services/web",
+  "services/mcp",  
 ]
 
 [workspace.package]
