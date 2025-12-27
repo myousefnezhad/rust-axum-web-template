@@ -7,6 +7,7 @@ use app_log::init_tracing;
 use app_redis::Redis;
 use app_state::AppState;
 use dotenv::dotenv;
+use rmcp::transport::streamable_http_server::session::local::LocalSessionManager;
 use sqlx::postgres::PgPoolOptions;
 use std::{env, sync::Arc};
 use tracing::*;
@@ -43,7 +44,7 @@ pub async fn mcp_service() {
         redis,
     });
     // Loading Routes
-    let routes = router(app_state);
+    let routes = router(app_state, LocalSessionManager::default().into());
     // Setup TCP Port
     let tcp_listener = tokio::net::TcpListener::bind(&bind).await.unwrap();
     // Running Server ...

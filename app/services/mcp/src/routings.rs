@@ -2,19 +2,20 @@ use crate::handlers::McpHandler;
 use app_middleware::mcp_auth_middleware;
 use app_state::AppState;
 use axum::{Router, middleware, routing::get};
-use rmcp::transport::streamable_http_server::{
-    StreamableHttpService, session::local::LocalSessionManager,
-};
+use rmcp::transport::streamable_http_server::{StreamableHttpService, session::SessionManager};
 use std::sync::Arc;
 use tower_http::trace::TraceLayer;
 
-pub fn router(state: Arc<AppState>) -> Router {
+pub fn router<M>(state: Arc<AppState>, session: Arc<M>) -> Router
+where
+    M: SessionManager,
+{
     let service = StreamableHttpService::new(
         {
             let state = state.clone();
             move || Ok(McpHandler::new(state.clone()))
         },
-        LocalSessionManager::default().into(),
+        session,
         Default::default(),
     );
 
