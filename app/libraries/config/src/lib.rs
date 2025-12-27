@@ -7,6 +7,8 @@ use std::{env, fs};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AppConfig {
     pub backend_bind: String, // 0.0.0.0:9000
+    pub mcp_bind: String,     // 0.0.0.0:9001
+    pub mcp_token: String,    // <TOKEN>
     pub log_level: LogLevel,  // Debug, Info, Warn, Error, Trace
     pub pg_connection: usize,
     pub redis_url: String,  // redis://127.0.0.1:6379

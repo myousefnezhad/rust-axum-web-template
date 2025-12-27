@@ -1,4 +1,4 @@
-Rust + Axum Web Template (Auth + Postgres + Redis)
+Rust + Axum Web Template (Auth + Postgres + Redis + MCP)
 =========================
 A clean, production-minded starter template for building web APIs with Rust and Axum.
 

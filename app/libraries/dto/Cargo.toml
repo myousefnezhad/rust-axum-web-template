@@ -5,3 +5,5 @@ edition.workspace = true
 
 [dependencies]
 serde = { workspace = true }
+schemars = { workspace = true }
+app_schema = { workspace = true }

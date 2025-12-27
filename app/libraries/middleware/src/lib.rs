@@ -18,11 +18,10 @@ pub async fn web_auth_middleware(
     next: Next,
 ) -> Response {
     info!(
-        "Authorization Middleware Running for {} {}",
+        "Web Athorization Middleware Running for {} {}",
         req.method(),
         req.uri()
     );
-
     let redis = state.redis.clone();
     let config = state.config.clone();
     let jwt_access_key = config.jwt_access_key.clone();
@@ -161,4 +160,39 @@ pub fn get_session(headers: &HeaderMap) -> Option<u64> {
             Ok(x) => Some(x),
         },
     }
+}
+
+pub async fn mcp_auth_middleware(
+    State(state): State<Arc<AppState>>,
+    req: Request,
+    next: Next,
+) -> Response {
+    info!(
+        "MCP Authorization Middleware Running for {} {}",
+        req.method(),
+        req.uri()
+    );
+    let config = state.config.clone();
+    let unauthorized =
+        || AppError::new("Unauthorized", StatusCode::UNAUTHORIZED, 0).into_response();
+
+    // IMPORTANT: make the header value owned so we don't keep borrowing `req`
+    let auth_header: String = match req
+        .headers()
+        .get(AUTHORIZATION)
+        .and_then(|v| v.to_str().ok())
+        .map(|s| s.to_string())
+    {
+        Some(v) => v,
+        None => return unauthorized(),
+    };
+    let parts: Vec<&str> = auth_header.split_whitespace().collect();
+    if parts.len() != 2 || !parts[0].eq_ignore_ascii_case("bearer") {
+        return unauthorized();
+    }
+    if &config.mcp_token != parts[1] {
+        error!("MCP token is not valid: {}", &parts[1]);
+        return unauthorized();
+    }
+    next.run(req).await
 }

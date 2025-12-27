@@ -7,9 +7,11 @@ use bcrypt::BcryptError;
 use deadpool_redis::{CreatePoolError, redis::RedisError};
 use jsonwebtoken::errors::Error as JwtError;
 use log::warn;
+use rmcp::{ErrorData, model::ErrorCode};
 use rsa::Error as RsaError;
 use serde::Serialize;
 use serde_json::Error as JsonError;
+use serde_json::json;
 use sqlx::Error as SqlxError;
 use std::{error::Error as StdError, fmt, io::Error as IoError};
 
@@ -159,5 +161,21 @@ impl From<BcryptError> for AppError {
             StatusCode::BAD_REQUEST,
             SYSTEM_ERROR_CODE_CRYPTO,
         )
+    }
+}
+
+// Convert to MCP ErrorData
+impl From<AppError> for ErrorData {
+    fn from(e: AppError) -> Self {
+        let code_i32 = i32::try_from(e.code).unwrap_or(i32::MAX);
+        ErrorData {
+            code: ErrorCode(code_i32),
+            message: e.message.clone().into(),
+            data: Some(json!({
+                "http_status": e.status.as_u16(),
+                "app_code": e.code,
+                "message": e.message,
+            })),
+        }
     }
 }

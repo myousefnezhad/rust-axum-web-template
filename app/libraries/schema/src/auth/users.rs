@@ -1,9 +1,10 @@
 use chrono::{DateTime, Utc};
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
 
-#[derive(Debug, Deserialize, Clone, FromRow, Serialize)]
+#[derive(Debug, Deserialize, Clone, FromRow, Serialize, JsonSchema)]
 pub struct User {
     pub id: Uuid,
     pub email: String,

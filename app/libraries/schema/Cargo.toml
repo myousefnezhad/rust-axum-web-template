@@ -9,3 +9,4 @@ uuid = { workspace = true }
 tokio = { workspace = true }
 serde = { workspace = true }
 chrono = { workspace = true }
+schemars = { workspace = true }
