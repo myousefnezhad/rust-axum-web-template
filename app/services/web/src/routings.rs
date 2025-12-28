@@ -1,4 +1,4 @@
-use crate::handlers::{index::*, login::*, ping::*, user::*};
+use crate::handlers::{google::*, index::*, login::*, ping::*, user::*};
 use app_middleware::web_auth_middleware;
 use app_state::AppState;
 use axum::{
@@ -13,6 +13,14 @@ pub fn router(state: Arc<AppState>) -> Router {
         .route("/", get(get_index).post(post_index))
         .route("/login", get(get_login).post(post_login))
         .route("/ping", get(ping).post(ping))
+        .nest(
+            "/google",
+            Router::new()
+                .route("/auth", get(get_google_auth))
+                .route("/token", get(page_google_token)),
+        )
+        // .layer(TraceLayer::new_for_http())
+        // .with_state(state.clone())
         .nest(
             "/auth",
             Router::new()

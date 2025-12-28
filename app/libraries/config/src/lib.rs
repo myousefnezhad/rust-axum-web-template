@@ -19,6 +19,12 @@ pub struct AppConfig {
     pub jwt_refresh_session_days: i64,
     pub rsa_private_key: String,
     pub rsa_public_key: String,
+    pub google_client_id: String,
+    pub google_client_secret: String,
+    pub google_redirect: String,
+    pub google_auth_url: String,
+    pub google_token_url: String,
+    pub google_userinfo_url: String,
 }
 
 impl AppConfig {

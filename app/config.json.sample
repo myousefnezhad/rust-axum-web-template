@@ -1,5 +1,7 @@
 {
   "backend_bind": "0.0.0.0:9000",
+  "mcp_bind": "0.0.0.0:9001",
+  "mcp_token": "<TOKEN>",
   "log_level": "Debug",
   "pg_connection": 10,
   "redis_url": "redis://127.0.0.1:6379",
@@ -10,4 +12,10 @@
   "jwt_refresh_session_days": 365,
   "rsa_private_key": "/rsa_key",
   "rsa_public_key": "/rsa_key.pub"
+  "google_client_id": "",
+  "google_client_secret": "",
+  "google_redirect": "http://localhost:9000/google/callback",
+  "google_auth_url": "https://accounts.google.com/o/oauth2/v2/auth?response_type=code&scope=openid%20email%20profil&",
+  "google_token_url": "https://oauth2.googleapis.com/token",
+  "google_userinfo_url": "https://www.googleapis.com/oauth2/v2/userinfo"
 }
