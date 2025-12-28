@@ -17,6 +17,7 @@ dotenv = { workspace = true }
 anyhow = { workspace = true }
 askama = { workspace = true }
 futures = { workspace = true }
+reqwest = { workspace = true }
 tracing = { workspace = true }
 app_log = { workspace = true }
 app_dto = { workspace = true }

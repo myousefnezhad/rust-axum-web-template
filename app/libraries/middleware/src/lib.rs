@@ -87,6 +87,7 @@ pub async fn web_auth_middleware(
                         name: refresh_claim.name.clone(),
                         email: refresh_claim.email.clone(),
                         session: refresh_claim.session,
+                        source: refresh_claim.source.clone(),
                     };
 
                     if let Ok(new_access_token) =

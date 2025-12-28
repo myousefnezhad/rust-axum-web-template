@@ -76,6 +76,7 @@ pub async fn post_login(
         name: name.clone(),
         email: email.clone(),
         session,
+        source: "local".to_string(),
     };
     // Refresh Token
     let exp = (Utc::now() + Duration::days(jwt_refresh_session_day)).timestamp();
@@ -86,6 +87,7 @@ pub async fn post_login(
         name: name.clone(),
         email: email.clone(),
         session,
+        source: "local".to_string(),
     };
     // Generate Tokens
     let access_token = generate_token(Algorithm::HS256, &jwt_access_key, &access_claim)?;
@@ -98,6 +100,7 @@ pub async fn post_login(
         email,
         session,
         token: refresh_token.clone(),
+        source: "local".to_string(),
     };
     let redis_info_str = serde_json::to_string(&redis_info)?;
     Redis::set(&redis, &redis_key, &redis_info_str).await?;

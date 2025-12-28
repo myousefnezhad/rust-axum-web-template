@@ -17,6 +17,7 @@ pub fn router(state: Arc<AppState>) -> Router {
             "/google",
             Router::new()
                 .route("/auth", get(get_google_auth))
+                .route("/callback", get(get_google_callback))
                 .route("/token", get(page_google_token)),
         )
         // .layer(TraceLayer::new_for_http())
