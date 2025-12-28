@@ -15,6 +15,7 @@ tower = { workspace = true }
 chrono = { workspace = true }
 dotenv = { workspace = true }
 anyhow = { workspace = true }
+askama = { workspace = true }
 futures = { workspace = true }
 tracing = { workspace = true }
 app_log = { workspace = true }

@@ -1,3 +1,4 @@
+use askama::Error as AskamaError;
 use axum::{
     Json,
     http::StatusCode,
@@ -20,6 +21,7 @@ pub static SYSTEM_ERROR_CODE_DB: i64 = -1001;
 pub static SYSTEM_ERROR_CODE_IO: i64 = -1002;
 pub static SYSTEM_ERROR_CODE_CRYPTO: i64 = -1003;
 pub static SYSTEM_ERROR_CODE_JSON: i64 = -1004;
+pub static SYSTEM_ERROR_CODE_RENDER: i64 = -1005;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct AppError {
@@ -160,6 +162,16 @@ impl From<BcryptError> for AppError {
             format!("{value:?}"),
             StatusCode::BAD_REQUEST,
             SYSTEM_ERROR_CODE_CRYPTO,
+        )
+    }
+}
+
+impl From<AskamaError> for AppError {
+    fn from(value: AskamaError) -> Self {
+        Self::new(
+            format!("{:?}", &value),
+            StatusCode::INTERNAL_SERVER_ERROR,
+            SYSTEM_ERROR_CODE_RENDER,
         )
     }
 }

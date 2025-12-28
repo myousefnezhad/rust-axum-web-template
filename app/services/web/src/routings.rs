@@ -11,7 +11,7 @@ use tower_http::trace::TraceLayer;
 pub fn router(state: Arc<AppState>) -> Router {
     Router::new()
         .route("/", get(get_index).post(post_index))
-        .route("/login", post(post_login))
+        .route("/login", get(get_login).post(post_login))
         .route("/ping", get(ping).post(ping))
         .nest(
             "/auth",

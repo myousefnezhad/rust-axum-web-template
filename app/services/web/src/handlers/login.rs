@@ -19,6 +19,18 @@ use tracing::error;
 
 const AUTH_FAILD_MESSAGE: &'static str = "Provided information is wrong!";
 
+use askama::Template;
+use axum::response::Html;
+
+#[derive(Template)]
+#[template(path = "login.html")]
+struct LoginPage;
+
+pub async fn get_login() -> Result<Html<String>, AppError> {
+    let page = LoginPage;
+    Ok(Html(page.render()?))
+}
+
 pub async fn post_login(
     State(state): State<Arc<AppState>>,
     Json(args): Json<PostLoginInput>,
