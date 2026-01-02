@@ -1,0 +1,6 @@
+mcp==1.22.0
+langchain==1.0.8
+langgraph==1.0.3
+langchain-mcp-adapters==0.1.13
+langchain_openai==1.0.3
+
