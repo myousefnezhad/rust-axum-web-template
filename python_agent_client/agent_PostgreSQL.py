@@ -1,5 +1,6 @@
 import uuid
 import asyncio
+from rich import print_json
 from psycopg.rows import dict_row
 from langchain_openai import ChatOpenAI
 from langchain.agents import create_agent
@@ -72,12 +73,19 @@ async def main():
         )
 
         config = {"configurable": {"thread_id": thread_id}}
-
+        result = None
         while True:
             user_prompt = input("Please enter your question: ").strip()
             if user_prompt.lower() in {"exit", "quit", "q"}:
                 print("Goodbye!")
                 return
+
+            if user_prompt.lower() in {"debug", "d"}:
+                if result is not None:
+                    for i, msg in enumerate(result["messages"]):
+                        print(f"\n--- Message {i} ---")
+                        print_json(data=msg.dict())
+                continue
 
             result = await agent.ainvoke(
                 {"messages": [{"role": "user", "content": user_prompt}]},

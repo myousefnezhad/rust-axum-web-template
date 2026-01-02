@@ -1,5 +1,6 @@
 import uuid
 import asyncio
+from rich import print_json
 from langchain_openai import ChatOpenAI
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_mcp_adapters.tools import load_mcp_tools
@@ -51,12 +52,19 @@ async def main():
         )
 
         config = {"configurable": {"thread_id": thread_id}}
-
+        result = None
         while True:
             user_prompt = input("Please enter your question: ").strip()
             if user_prompt.lower() in {"exit", "quit", "q"}:
                 print("Goodbye!")
                 return
+
+            if user_prompt.lower() in {"debug", "d"}:
+                if result is not None:
+                    for i, msg in enumerate(result["messages"]):
+                        print(f"\n--- Message {i} ---")
+                        print_json(data=msg.dict())
+                continue
 
             result = await agent.ainvoke(
                 {"messages": [{"role": "user", "content": user_prompt}]},
