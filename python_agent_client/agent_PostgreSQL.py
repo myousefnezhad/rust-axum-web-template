@@ -1,10 +1,15 @@
 import uuid
 import asyncio
+from psycopg.rows import dict_row
 from langchain_openai import ChatOpenAI
-from langchain_mcp_adapters.client import MultiServerMCPClient
-from langchain_mcp_adapters.tools import load_mcp_tools
-from langgraph.checkpoint.memory import InMemorySaver
 from langchain.agents import create_agent
+from psycopg_pool import AsyncConnectionPool
+from langgraph.checkpoint.memory import InMemorySaver
+from langchain_mcp_adapters.tools import load_mcp_tools
+from langgraph.checkpoint.postgres import PostgresSaver
+from langchain_mcp_adapters.client import MultiServerMCPClient
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+
 
 MCP_URL = "http://localhost:9001/v1/mcp"
 MCP_TOKEN = "<MCP TOKEN>"
@@ -12,13 +17,29 @@ VLLM_TOKEN = "<VLLM TOKEN>"
 VLLM_MODEL = "openai/gpt-oss-20b"
 VLLM_BASE_URL = "http://localhost:8000/v1"
 SYSTEM_PROMPT = """You are an agent that uses the available tools to answer questions."""
+# You should first make a database called agent
+PG_CONN_STR = "postgresql://postgres:<DB PASSWORD>@localhost:5432/agent?sslmode=disable"
+
 
 async def main():
     # LangGraph memory thread_id (unrelated to MCP session)
     # thread_id = "20e2308a-98df-11b0-a04e-ff0051748e5a"
     thread_id = str(uuid.uuid4())
-
-    checkpointer = InMemorySaver()
+    
+    pool = AsyncConnectionPool(
+        conninfo=PG_CONN_STR,
+        max_size=15,
+        open=False,
+        kwargs={
+            "autocommit": True,
+            "prepare_threshold": 0,
+            "row_factory": dict_row
+        },
+    )
+    await pool.open()
+    checkpointer = AsyncPostgresSaver(pool)
+    # First time to make database schema, next time doing nothing
+    await checkpointer.setup() 
 
     client = MultiServerMCPClient(
         {
