@@ -3,7 +3,7 @@
 # wget https://huggingface.co/ggml-org/gpt-oss-20b-GGUF/resolve/main/gpt-oss-20b-mxfp4.gguf -O ~/model/gpt-oss-20b-mxfp4.gguf
 
 # We test on ghcr.io/ggml-org/llama.cpp@sha256:617ab960d6adcdaf521408d4d5fe591bcdfbf799a5822ec751a07565ac3c812f
-docker pull ghcr.io/ggerganov/llama.cpp:server-cuda
+docker pull ghcr.io/ggml-org/llama.cpp:server-cuda
 docker rm -f gpt-oss-20b
 docker run -d --name gpt-oss-20b \
   --gpus '"device=0"' \
