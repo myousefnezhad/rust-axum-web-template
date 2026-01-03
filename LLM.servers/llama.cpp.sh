@@ -1,6 +1,6 @@
 # Download model
 # mkdir ~/model
-# wget https://huggingface.co/ggml-org/gpt-oss-20b-GGUF/resolve/main/gpt-oss-20b-mxfp4.gguf -O ~/model/.
+# wget https://huggingface.co/ggml-org/gpt-oss-20b-GGUF/resolve/main/gpt-oss-20b-mxfp4.gguf -O ~/model/gpt-oss-20b-mxfp4.gguf
 
 docker pull ghcr.io/ggerganov/llama.cpp:server-cuda
 docker rm -f gpt-oss-20b
