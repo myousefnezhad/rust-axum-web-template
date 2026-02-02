@@ -14,7 +14,9 @@ docker run -d --name gpt-oss-20b \
   --host 0.0.0.0 --port 8000 --jinja \
   --model /model/gpt-oss-20b-mxfp4.gguf \
   --ctx-size 4096 --flash-attn on \
+  --embeddings --pooling mean \
   --api-key <TOKEN GOES HERE>
 
 # Other option (not working well with tools) 
 #  --repeat-penalty 1.5 --n-gpu-layers 999 \
+#  --embeddings --pooling mean \ to provide embeddings and RAG feature
