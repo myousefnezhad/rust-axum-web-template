@@ -9,7 +9,11 @@ pub struct AppConfig {
     pub backend_bind: String, // 0.0.0.0:9000
     pub mcp_bind: String,     // 0.0.0.0:9001
     pub mcp_token: String,    // <TOKEN>
-    pub log_level: LogLevel,  // Debug, Info, Warn, Error, Trace
+    pub mcp_base_url: String, // For Agent Cli
+    pub llm_base_url: String,
+    pub llm_token: String,
+    pub llm_model: String,
+    pub log_level: LogLevel, // Debug, Info, Warn, Error, Trace
     pub pg_connection: usize,
     pub redis_url: String,  // redis://127.0.0.1:6379
     pub redis_session: u64, // 10000
