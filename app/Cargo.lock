@@ -455,6 +455,7 @@ dependencies = [
  "adk-core",
  "adk-model",
  "adk-rust",
+ "adk-tool",
  "anyhow",
  "async-trait",
  "config",

@@ -4,13 +4,13 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-#rmcp = { workspace = true }
-rmcp = { version = "0.9", features = ["client", "reqwest", "transport-streamable-http-client", "transport-streamable-http-client-reqwest"] }
 tokio = { workspace = true }
 anyhow = { workspace = true }
 dotenv = { workspace = true }
+rmcp09 = { workspace = true }
 reqwest = { workspace = true }
 adk-agent = { workspace = true }
+adk-tool  = { workspace = true }
 adk-core  = { workspace = true }
 adk-cli   = { workspace = true }
 adk-model = { workspace = true }
