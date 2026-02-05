@@ -451,17 +451,22 @@ name = "agent_cli"
 version = "0.1.0"
 dependencies = [
  "adk-agent",
+ "adk-artifact",
  "adk-cli",
  "adk-core",
  "adk-model",
+ "adk-runner",
  "adk-rust",
+ "adk-session",
  "adk-tool",
  "anyhow",
  "async-trait",
  "config",
  "dotenv",
+ "futures",
  "reqwest",
  "rmcp 0.9.1",
+ "serde_json",
  "tokio",
 ]
 
