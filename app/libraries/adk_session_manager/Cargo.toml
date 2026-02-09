@@ -1,0 +1,14 @@
+[package]
+name = "adk_session_manager"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+async-trait =  { workspace = true }
+serde_json  = { workspace = true }
+adk-core  =  { workspace = true }
+adk-session = { workspace = true }
+adk-rust   = { workspace = true }
+sqlx = { workspace = true }
+chrono  = { workspace = true }
+uuid  = { workspace = true } 

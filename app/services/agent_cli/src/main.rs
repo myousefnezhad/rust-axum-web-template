@@ -4,30 +4,33 @@ use adk_model::{OpenAIClient, OpenAIConfig};
 use adk_runner::{Runner, RunnerConfig};
 use adk_rust::prelude::*;
 use adk_rust::session::{CreateRequest, SessionService};
+use app_adk_session_manager::PgSessionService;
 use app_config::AppConfig;
+use dotenv::dotenv;
 use futures::StreamExt;
 use rmcp09::ServiceExt;
 use rmcp09::transport::streamable_http_client::{
     StreamableHttpClientTransport, StreamableHttpClientTransportConfig,
 };
+use sqlx::PgPool;
 use std::{
     collections::HashMap,
+    env,
     io::{self, Write},
     sync::Arc,
 };
 
 #[tokio::main]
 async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
+    dotenv().ok();
+    // This should be determine from setting in real application
+    let app_name = "app".to_string(); // Should be the same in session and runner
+    let user_id = "user".to_string();
+    let session_id = "console".to_string(); // This could be UUID
+
     let config = AppConfig::new();
-    // Tool Config
-    let mcp_cfg = StreamableHttpClientTransportConfig::with_uri(config.mcp_base_url.clone())
-        .auth_header(&config.mcp_token.clone());
-    let transport = StreamableHttpClientTransport::from_config(mcp_cfg);
-    let mcp_client = ().serve(transport).await?;
-    let toolset = McpToolset::new(mcp_client);
-    let _cancel = toolset.cancellation_token().await;
-    let ctx: Arc<dyn ReadonlyContext> = Arc::new(SimpleContext);
-    let tools = toolset.tools(ctx).await?;
+    let db_url = env::var("DATABASE_URL")?;
+    let pg_pool = PgPool::connect(&db_url).await?;
 
     // Model Configuration
     let model_config = OpenAIConfig {
@@ -39,11 +42,39 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     };
     let model = OpenAIClient::new(model_config)?;
 
+    // Launcher::new(agent).run().await?;
+    // Or manually run it
+    let create_req = CreateRequest {
+        app_name: app_name.clone(),
+        user_id: user_id.clone(),
+        session_id: Some(session_id.clone()),
+        state: HashMap::new(),
+    };
+
+    // Agent Session Manager
+    // In memory session manager
+    // let sessions = Arc::new(InMemorySessionService::new());
+    // let _ = sessions.create(create_req).await?;
+    let sessions = Arc::new(PgSessionService::new(pg_pool).await?);
+    sessions.migrate().await?;
+    sessions.create(create_req).await?;
+
+    // MCP Tool Config
+    let mcp_cfg = StreamableHttpClientTransportConfig::with_uri(config.mcp_base_url.clone())
+        .auth_header(&config.mcp_token.clone());
+    let transport = StreamableHttpClientTransport::from_config(mcp_cfg);
+    let mcp_client = ().serve(transport).await?;
+    let toolset = McpToolset::new(mcp_client);
+    let _cancel = toolset.cancellation_token().await;
+    let ctx: Arc<dyn ReadonlyContext> = Arc::new(SimpleContext);
+    let tools = toolset.tools(ctx).await?;
+
+    // Agent Builder
     let mut builder = LlmAgentBuilder::new("Agent")
         .description("This is my first AI Agent")
         .instruction("You are a very frindly agent answering the questions")
         .model(Arc::new(model));
-    // Add MCP tools
+    // Add custom MCP tools to Agent
     for t in tools {
         builder = builder.tool(t);
     }
@@ -53,25 +84,8 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     builder = builder.tool(Arc::new(GoogleSearchTool::new()));
     let agent = Arc::new(builder.build()?);
 
-    // Launcher::new(agent).run().await?;
-    // Or manually run it
-    let app_name = "app".to_string(); // Should be the same in session and runner
-    let user_id = "user".to_string();
-    let session_id = "console".to_string();
-
-    let create_req = CreateRequest {
-        app_name: app_name.clone(),
-        user_id: user_id.clone(),
-        session_id: Some(session_id.clone()),
-        state: HashMap::new(),
-    };
-
-    // In memory session manager
-    let sessions = Arc::new(InMemorySessionService::new());
-    let _ = sessions.create(create_req).await?;
-
+    // Agent Runner
     let artifacts = Arc::new(InMemoryArtifactService::new());
-
     let runner = Runner::new(RunnerConfig {
         app_name: app_name.clone(),
         agent: agent,

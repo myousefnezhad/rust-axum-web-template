@@ -441,6 +441,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "adk_session_manager"
+version = "0.1.0"
+dependencies = [
+ "adk-core",
+ "adk-rust",
+ "adk-session",
+ "async-trait",
+ "chrono",
+ "serde_json",
+ "sqlx",
+ "uuid",
+]
+
+[[package]]
 name = "adler2"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -459,6 +473,7 @@ dependencies = [
  "adk-rust",
  "adk-session",
  "adk-tool",
+ "adk_session_manager",
  "anyhow",
  "async-trait",
  "config",
@@ -467,6 +482,7 @@ dependencies = [
  "reqwest",
  "rmcp 0.9.1",
  "serde_json",
+ "sqlx",
  "tokio",
 ]
 
