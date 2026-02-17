@@ -4,6 +4,7 @@ use rmcp::{
     ErrorData as McpError, RoleServer, ServerHandler,
     handler::server::{prompt::PromptContext, tool::ToolCallContext},
     model::*,
+    serde_json::Value as JsonValue,
     service::RequestContext,
 };
 use std::sync::Arc;
@@ -102,8 +103,16 @@ impl ServerHandler for McpHandler {
     async fn call_tool(
         &self,
         req: CallToolRequestParam,
-        ctx: RequestContext<RoleServer>,
+        mut ctx: RequestContext<RoleServer>,
     ) -> Result<CallToolResult, McpError> {
+        ctx.meta.insert(
+            "__adk_tool_name".into(),
+            JsonValue::String(req.name.clone().to_string()),
+        );
+        ctx.meta.insert(
+            "__adk_tool_args".into(),
+            JsonValue::Object(req.arguments.clone().unwrap_or_default()),
+        );
         // Check if Counter owns this tool
         if self.counter.tool_router.has_route(&req.name) {
             let counter_ctx = ToolCallContext::new(

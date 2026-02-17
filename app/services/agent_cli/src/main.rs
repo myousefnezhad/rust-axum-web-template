@@ -6,12 +6,14 @@ use adk_rust::prelude::*;
 use adk_rust::session::{CreateRequest, SessionService};
 use app_adk_session_manager::PgSessionService;
 use app_config::AppConfig;
+use async_trait::async_trait;
 use dotenv::dotenv;
 use futures::StreamExt;
 use rmcp09::ServiceExt;
 use rmcp09::transport::streamable_http_client::{
     StreamableHttpClientTransport, StreamableHttpClientTransportConfig,
 };
+use serde_json::{Map, Value, json};
 use sqlx::PgPool;
 use std::{
     collections::HashMap,
@@ -19,6 +21,57 @@ use std::{
     io::{self, Write},
     sync::Arc,
 };
+
+pub struct InjectSessionTool {
+    inner: Arc<dyn Tool>,
+}
+
+impl InjectSessionTool {
+    pub fn new(inner: Arc<dyn Tool>) -> Self {
+        Self { inner }
+    }
+}
+
+fn ensure_object(args: Value) -> Map<String, Value> {
+    match args {
+        Value::Object(m) => m,
+        other => {
+            let mut m = Map::new();
+            m.insert("input".to_string(), other);
+            m
+        }
+    }
+}
+
+#[async_trait]
+impl Tool for InjectSessionTool {
+    fn name(&self) -> &str {
+        self.inner.name()
+    }
+
+    fn description(&self) -> &str {
+        self.inner.description()
+    }
+
+    async fn execute(&self, ctx: Arc<dyn ToolContext>, args: Value) -> Result<Value> {
+        let mut obj = ensure_object(args);
+
+        // Pull identity directly from ToolContext
+        obj.insert(
+            "_adk".to_string(),
+            json!({
+                "app_name": ctx.app_name(),
+                "user_id": ctx.user_id(),
+                "session_id": ctx.session_id(),
+                "agent_name": ctx.agent_name(),
+                "invocation_id": ctx.invocation_id(),
+                "branch": ctx.branch(),
+            }),
+        );
+
+        self.inner.execute(ctx, Value::Object(obj)).await
+    }
+}
 
 #[tokio::main]
 async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
@@ -76,7 +129,7 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
         .model(Arc::new(model));
     // Add custom MCP tools to Agent
     for t in tools {
-        builder = builder.tool(t);
+        builder = builder.tool(Arc::new(InjectSessionTool::new(t)));
     }
     // Add Google Search Tools
     // Note: compatible with Gemini 2 models
