@@ -41,6 +41,9 @@ pub async fn app_service() {
         config: config.clone(),
         pg,
         redis,
+        agent_app_id: None,
+        agent_runner: None,
+        agent_session: None,
     });
     // Loading Routes
     let routes = router(app_state);

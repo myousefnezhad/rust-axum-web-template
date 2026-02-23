@@ -44,6 +44,9 @@ pub async fn mcp_service() {
         config: config.clone(),
         pg,
         redis,
+        agent_app_id: None,
+        agent_runner: None,
+        agent_session: None,
     });
     // Loading Routes
     let mcp_config = StreamableHttpServerConfig {
