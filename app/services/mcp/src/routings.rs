@@ -2,11 +2,17 @@ use crate::handlers::McpHandler;
 use app_middleware::mcp_auth_middleware;
 use app_state::AppState;
 use axum::{Router, middleware, routing::get};
-use rmcp::transport::streamable_http_server::{StreamableHttpService, session::SessionManager};
+use rmcp::transport::streamable_http_server::{
+    StreamableHttpServerConfig, StreamableHttpService, session::SessionManager,
+};
 use std::sync::Arc;
 use tower_http::trace::TraceLayer;
 
-pub fn router<M>(state: Arc<AppState>, session: Arc<M>) -> Router
+pub fn router<M>(
+    state: Arc<AppState>,
+    session: Arc<M>,
+    mcp_config: StreamableHttpServerConfig,
+) -> Router
 where
     M: SessionManager,
 {
@@ -16,7 +22,7 @@ where
             move || Ok(McpHandler::new(state.clone()))
         },
         session,
-        Default::default(),
+        mcp_config,
     );
 
     Router::new()
