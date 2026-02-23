@@ -31,6 +31,7 @@ hyper-util = { workspace = true }
 tokio-util = { workspace = true }
 rmcp-macros = { workspace = true }
 async-trait = { workspace = true }
+app_adk_utils = { workspace = true }
 app_middleware = { workspace = true }
 http-body-util = { workspace = true }
 app_cryptography = { workspace = true }

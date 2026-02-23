@@ -23,4 +23,4 @@ serde_json = { workspace = true }
 async-trait = { workspace = true }
 adk-session = { workspace = true }
 adk-artifact = { workspace = true }
-app_adk_session_manager = { workspace = true }
+app_adk_utils = { workspace = true }

@@ -4,16 +4,17 @@ use adk_model::{OpenAIClient, OpenAIConfig};
 use adk_runner::{Runner, RunnerConfig};
 use adk_rust::prelude::*;
 use adk_rust::session::{CreateRequest, SessionService};
-use app_adk_session_manager::PgSessionService;
+use app_adk_utils::{
+    content::SimpleContext,
+    session::{postgres::PgSessionService, tools::AdkInjectSessionTool},
+};
 use app_config::AppConfig;
-use async_trait::async_trait;
 use dotenv::dotenv;
 use futures::StreamExt;
 use rmcp09::ServiceExt;
 use rmcp09::transport::streamable_http_client::{
     StreamableHttpClientTransport, StreamableHttpClientTransportConfig,
 };
-use serde_json::{Map, Value, json};
 use sqlx::PgPool;
 use std::{
     collections::HashMap,
@@ -21,57 +22,6 @@ use std::{
     io::{self, Write},
     sync::Arc,
 };
-
-pub struct InjectSessionTool {
-    inner: Arc<dyn Tool>,
-}
-
-impl InjectSessionTool {
-    pub fn new(inner: Arc<dyn Tool>) -> Self {
-        Self { inner }
-    }
-}
-
-fn ensure_object(args: Value) -> Map<String, Value> {
-    match args {
-        Value::Object(m) => m,
-        other => {
-            let mut m = Map::new();
-            m.insert("input".to_string(), other);
-            m
-        }
-    }
-}
-
-#[async_trait]
-impl Tool for InjectSessionTool {
-    fn name(&self) -> &str {
-        self.inner.name()
-    }
-
-    fn description(&self) -> &str {
-        self.inner.description()
-    }
-
-    async fn execute(&self, ctx: Arc<dyn ToolContext>, args: Value) -> Result<Value> {
-        let mut obj = ensure_object(args);
-
-        // Pull identity directly from ToolContext
-        obj.insert(
-            "_adk".to_string(),
-            json!({
-                "app_name": ctx.app_name(),
-                "user_id": ctx.user_id(),
-                "session_id": ctx.session_id(),
-                "agent_name": ctx.agent_name(),
-                "invocation_id": ctx.invocation_id(),
-                "branch": ctx.branch(),
-            }),
-        );
-
-        self.inner.execute(ctx, Value::Object(obj)).await
-    }
-}
 
 #[tokio::main]
 async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
@@ -119,7 +69,10 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let mcp_client = ().serve(transport).await?;
     let toolset = McpToolset::new(mcp_client);
     let _cancel = toolset.cancellation_token().await;
-    let ctx: Arc<dyn ReadonlyContext> = Arc::new(SimpleContext);
+    let ctx: Arc<dyn ReadonlyContext> = Arc::new(SimpleContext {
+        app_name: Some(app_name.clone()),
+        ..Default::default()
+    });
     let tools = toolset.tools(ctx).await?;
 
     // Agent Builder
@@ -129,7 +82,7 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
         .model(Arc::new(model));
     // Add custom MCP tools to Agent
     for t in tools {
-        builder = builder.tool(Arc::new(InjectSessionTool::new(t)));
+        builder = builder.tool(Arc::new(AdkInjectSessionTool::new(t)));
     }
     // Add Google Search Tools
     // Note: compatible with Gemini 2 models
@@ -205,32 +158,4 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
         println!("{}", &buf);
     }
     Ok(())
-}
-
-struct SimpleContext;
-
-#[async_trait::async_trait]
-impl ReadonlyContext for SimpleContext {
-    fn invocation_id(&self) -> &str {
-        "init"
-    }
-    fn agent_name(&self) -> &str {
-        "assistant"
-    }
-    fn user_id(&self) -> &str {
-        "user"
-    }
-    fn app_name(&self) -> &str {
-        "app"
-    }
-    fn session_id(&self) -> &str {
-        "init"
-    }
-    fn branch(&self) -> &str {
-        "main"
-    }
-    fn user_content(&self) -> &Content {
-        static CONTENT: std::sync::OnceLock<Content> = std::sync::OnceLock::new();
-        CONTENT.get_or_init(|| Content::new("user").with_text(""))
-    }
 }

@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
-  "libraries/adk_session_manager",
+  "libraries/adk_utils",
   "libraries/app_state",
   "libraries/config",
   "libraries/cryptography",
@@ -78,7 +78,7 @@ rmcp = { version = "0.12.0", features = [ "server", "macros", "client", "transpo
 rmcp09 = { package = "rmcp", version = "0.9.1", features = ["client", "reqwest", "transport-streamable-http-client", "transport-streamable-http-client-reqwest"] }
 
 # Internal Libraries
-app_adk_session_manager = { path = "./libraries/adk_session_manager", package = "adk_session_manager" }
+app_adk_utils = { path = "./libraries/adk_utils", package = "adk_utils" }
 app_config = { path = "./libraries/config", package = "config" }
 app_cryptography = { path = "./libraries/cryptography", package = "cryptography" }
 app_dto = { path = "./libraries/dto", package = "dto" }

@@ -441,7 +441,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "adk_session_manager"
+name = "adk_utils"
 version = "0.1.0"
 dependencies = [
  "adk-core",
@@ -449,6 +449,7 @@ dependencies = [
  "adk-session",
  "async-trait",
  "chrono",
+ "serde",
  "serde_json",
  "sqlx",
  "uuid",
@@ -473,7 +474,7 @@ dependencies = [
  "adk-rust",
  "adk-session",
  "adk-tool",
- "adk_session_manager",
+ "adk_utils",
  "anyhow",
  "async-trait",
  "config",
@@ -5141,6 +5142,7 @@ dependencies = [
 name = "tools"
 version = "0.1.0"
 dependencies = [
+ "adk_utils",
  "anyhow",
  "app_state",
  "async-trait",

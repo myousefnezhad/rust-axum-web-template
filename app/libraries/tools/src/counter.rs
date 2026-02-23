@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+use app_adk_utils::session::tools::AdkInjectContext;
 use app_error::AppError;
 use app_state::AppState;
 use rmcp::{
@@ -9,44 +10,15 @@ use rmcp::{
     },
     model::*,
     prompt, prompt_router, schemars,
-    serde_json::Value as JsonValue,
     service::RequestContext,
     tool, tool_router,
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use serde_json::from_value;
 use serde_json::json;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tracing::*;
-
-#[derive(Debug, Default, Deserialize)]
-pub struct AdkContext {
-    pub app_name: Option<String>,
-    pub user_id: Option<String>,
-    pub session_id: Option<String>,
-    pub agent_name: Option<String>,
-    pub invocation_id: Option<String>,
-    pub branch: Option<String>,
-}
-
-pub fn extract_adk_context(tool_args: Option<JsonValue>) -> AdkContext {
-    // If no tool_args → return empty struct
-    let args = match tool_args {
-        Some(JsonValue::Object(map)) => map,
-        _ => return AdkContext::default(),
-    };
-
-    // If no "_adk" field → return empty struct
-    let adk_val = match args.get("_adk") {
-        Some(val) => val.clone(),
-        None => return AdkContext::default(),
-    };
-
-    // Try deserialize → if fails return empty struct
-    from_value::<AdkContext>(adk_val).unwrap_or_default()
-}
 
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct StructRequest {
@@ -95,7 +67,7 @@ impl CounterTools {
             .and_then(|v| v.as_str())
             .unwrap_or("unknown");
         let tool_args = ctx_req.meta.get("__adk_tool_args").cloned();
-        let adk = extract_adk_context(tool_args);
+        let adk = AdkInjectContext::extract_adk_context(tool_args);
         debug!("tool_name={tool_name}");
         debug!("tool_args={adk:#?}");
         let mut counter = self.counter.lock().await;
