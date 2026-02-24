@@ -11,7 +11,6 @@ pub struct AppState {
     pub redis: RedisPool,
     pub config: AppConfig,
     pub pg: PostgresPool<Postgres>,
-    pub agent_app_id: Option<String>, // This is a agent, you should create a set of id, runner, and sessions for each agent
     pub agent_runner: Option<Arc<Runner>>,
     pub agent_session: Option<Arc<dyn SessionService>>,
 }

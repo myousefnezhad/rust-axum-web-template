@@ -38,7 +38,7 @@ impl RagTools {
         Parameters(args): Parameters<McpAddKnowledgeBasedToolInput>,
     ) -> Result<Json<McpAddKnowledgeBasedToolOutput>, McpError> {
         let pg = self.state.pg.clone();
-        let content_embd = embedding(&self.state, &args.content)
+        let content_embd = embedding(&self.state.config, &args.content)
             .await
             .map_err(AppError::from)?;
         sqlx::query("INSERT INTO rag.knowledge_based (chunk, embedding) VALUES ($1, $2)")
@@ -61,7 +61,7 @@ impl RagTools {
         Parameters(args): Parameters<McpSearchKnowledgeBasedToolInput>,
     ) -> Result<Json<McpSearchKnowledgeBasedToolOutput>, McpError> {
         let pg = self.state.pg.clone();
-        let content_embd = embedding(&self.state, &args.content)
+        let content_embd = embedding(&self.state.config, &args.content)
             .await
             .map_err(AppError::from)?;
         let confident = match &args.confident {

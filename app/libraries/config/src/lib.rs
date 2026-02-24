@@ -17,6 +17,9 @@ pub struct AppConfig {
     pub rag_base_url: String,
     pub rag_token: String,
     pub rag_model: String,
+    pub agent_app_name: String,
+    pub agent_description: String,
+    pub agent_instruction: String,
     pub log_level: LogLevel, // Debug, Info, Warn, Error, Trace
     pub pg_connection: usize,
     pub redis_url: String,  // redis://127.0.0.1:6379

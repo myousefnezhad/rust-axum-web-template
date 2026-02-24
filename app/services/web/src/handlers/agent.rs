@@ -1,12 +1,15 @@
 use adk_core::Content;
-use adk_rust::prelude::Part;
 use adk_rust::session::{CreateRequest, GetRequest};
+use app_agent::runner::stream_response_parser;
 use app_error::AppError;
+use app_middleware::get_email;
 use app_state::AppState;
 use askama::Template;
-use axum::extract::{Json, State};
 use axum::response::Html;
-use futures::StreamExt;
+use axum::{
+    extract::{Json, State},
+    http::HeaderMap,
+};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -34,9 +37,17 @@ pub struct ChatPostOutput {
 }
 
 pub async fn post_agent(
+    headers: HeaderMap,
     State(state): State<Arc<AppState>>,
     Json(args): Json<ChatPostInput>,
 ) -> Result<Json<ChatPostOutput>, AppError> {
+    let config = state.config.clone();
+    let user_id = match get_email(&headers) {
+        None => {
+            return Err(AppError::internal("Cannot identify user"));
+        }
+        Some(u) => u,
+    };
     let agent_runner = match &state.agent_runner {
         None => {
             return Err(AppError::internal("Cannot find agent runner"));
@@ -49,20 +60,13 @@ pub async fn post_agent(
         }
         Some(session) => session.clone(),
     };
-    let agent_app_id = match &state.agent_app_id {
-        None => {
-            return Err(AppError::internal("Cannot find agent app id"));
-        }
-        Some(id) => id.clone(),
-    };
-
     let new_session_id = Uuid::new_v4().to_string();
     let agent_current_session = match &args.session_id {
         // Make a new session
         None => match agent_session
             .create(CreateRequest {
-                app_name: agent_app_id.clone(),
-                user_id: "default".to_string(),
+                app_name: config.agent_app_name.clone(),
+                user_id: user_id.clone(),
                 session_id: Some(new_session_id.clone()),
                 state: HashMap::new(),
             })
@@ -76,8 +80,8 @@ pub async fn post_agent(
         // Find Exising Session
         Some(session_id) => match agent_session
             .get(GetRequest {
-                app_name: agent_app_id.clone(),
-                user_id: "default".to_string(),
+                app_name: config.agent_app_name.clone(),
+                user_id: user_id.clone(),
                 session_id: session_id.clone(),
                 num_recent_events: None,
                 after: None,
@@ -88,8 +92,8 @@ pub async fn post_agent(
             // Make a new Session if session not found
             Err(_) => match agent_session
                 .create(CreateRequest {
-                    app_name: agent_app_id.clone(),
-                    user_id: "default".to_string(),
+                    app_name: config.agent_app_name.clone(),
+                    user_id: user_id.clone(),
                     session_id: Some(new_session_id.clone()),
                     state: HashMap::new(),
                 })
@@ -104,40 +108,18 @@ pub async fn post_agent(
     };
     // Making Agent Runner
     let user_input = Content::new("user").with_text(args.content);
-    let stream = match agent_runner
-        .run(
-            "default".to_owned(),
-            agent_current_session.clone(),
-            user_input,
-        )
+    let mut stream = match agent_runner
+        .run(user_id.clone(), agent_current_session.clone(), user_input)
         .await
     {
         Ok(s) => s,
         Err(e) => return Err(AppError::internal(&format!("{}", &e))),
     };
     // Generating Answer
-    let mut answer_buf = String::new();
-    let mut stream = stream;
-    while let Some(ev) = stream.next().await {
-        let ev = match ev {
-            Err(e) => return Err(AppError::internal(&format!("{}", &e))),
-            Ok(e) => e,
-        };
-        match &ev.content() {
-            Some(ctx) => {
-                for part in ctx.parts.iter() {
-                    match &part {
-                        Part::Text { text } => answer_buf.push_str(&text),
-                        _ => (),
-                    }
-                }
-            }
-            None => (),
-        }
-    }
+    let content = stream_response_parser(&mut stream, None).await?;
 
     Ok(Json(ChatPostOutput {
         session_id: agent_current_session.clone(),
-        content: answer_buf,
+        content,
     }))
 }

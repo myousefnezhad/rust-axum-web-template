@@ -2,6 +2,7 @@ pub mod handlers;
 pub mod routings;
 
 use crate::routings::router;
+use app_agent::builder::agent_builder;
 use app_config::AppConfig;
 use app_log::init_tracing;
 use app_redis::Redis;
@@ -36,14 +37,15 @@ pub async fn app_service() {
         Ok(redis_pool) => redis_pool,
         Err(err) => panic!("Cannot connect Redis\n{}", err),
     };
+    // Generate Agent
+    let (agent_runner, agent_session) = agent_builder(&config).await.unwrap();
     // Generating AppState
     let app_state = Arc::new(AppState {
         config: config.clone(),
         pg,
         redis,
-        agent_app_id: None,
-        agent_runner: None,
-        agent_session: None,
+        agent_runner: Some(agent_runner),
+        agent_session: Some(agent_session),
     });
     // Loading Routes
     let routes = router(app_state);

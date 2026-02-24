@@ -1,3 +1,5 @@
+use adk_core::AdkError;
+use adk_rust::anyhow::Error as AdkRustError;
 use askama::Error as AskamaError;
 use axum::{
     Json,
@@ -9,12 +11,15 @@ use deadpool_redis::{CreatePoolError, redis::RedisError};
 use jsonwebtoken::errors::Error as JwtError;
 use log::warn;
 use rmcp::{ErrorData, model::ErrorCode};
+use rmcp09::service::ClientInitializeError;
 use rsa::Error as RsaError;
 use serde::Serialize;
 use serde_json::Error as JsonError;
 use serde_json::json;
 use sqlx::Error as SqlxError;
-use std::{error::Error as StdError, fmt, io::Error as IoError};
+use std::{
+    env::VarError, error::Error as StdError, fmt, io::Error as IoError, num::TryFromIntError,
+};
 
 pub static SYSTEM_ERROR_CODE: i64 = -1000;
 pub static SYSTEM_ERROR_CODE_DB: i64 = -1001;
@@ -22,6 +27,8 @@ pub static SYSTEM_ERROR_CODE_IO: i64 = -1002;
 pub static SYSTEM_ERROR_CODE_CRYPTO: i64 = -1003;
 pub static SYSTEM_ERROR_CODE_JSON: i64 = -1004;
 pub static SYSTEM_ERROR_CODE_RENDER: i64 = -1005;
+pub static SYSTEM_ERROR_CODE_ENV: i64 = -1006;
+pub static SYSTEM_ERROR_CODE_AGENT: i64 = -1007;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct AppError {
@@ -85,6 +92,55 @@ impl IntoResponse for AppError {
 // --------------------
 // Error conversions
 // --------------------
+impl From<VarError> for AppError {
+    fn from(value: VarError) -> Self {
+        Self::new(
+            format!("{value:?}"),
+            StatusCode::BAD_REQUEST,
+            SYSTEM_ERROR_CODE_ENV,
+        )
+    }
+}
+
+impl From<TryFromIntError> for AppError {
+    fn from(value: TryFromIntError) -> Self {
+        Self::new(
+            format!("{value:?}"),
+            StatusCode::BAD_REQUEST,
+            SYSTEM_ERROR_CODE_ENV,
+        )
+    }
+}
+
+impl From<AdkRustError> for AppError {
+    fn from(value: AdkRustError) -> Self {
+        Self::new(
+            format!("{value:?}"),
+            StatusCode::BAD_REQUEST,
+            SYSTEM_ERROR_CODE_AGENT,
+        )
+    }
+}
+
+impl From<AdkError> for AppError {
+    fn from(value: AdkError) -> Self {
+        Self::new(
+            format!("{value:?}"),
+            StatusCode::BAD_REQUEST,
+            SYSTEM_ERROR_CODE_AGENT,
+        )
+    }
+}
+
+impl From<ClientInitializeError> for AppError {
+    fn from(value: ClientInitializeError) -> Self {
+        Self::new(
+            format!("{value:?}"),
+            StatusCode::BAD_REQUEST,
+            SYSTEM_ERROR_CODE_AGENT,
+        )
+    }
+}
 
 impl From<SqlxError> for AppError {
     fn from(value: SqlxError) -> Self {

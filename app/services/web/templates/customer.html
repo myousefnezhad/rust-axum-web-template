@@ -15,8 +15,11 @@
 <body>
   <div class="container">
     <h1>Customer Information</h1>
-    <a class="btn btn-primary my-3" href="/kb">Knowledge Based</a>
-    <a class="btn btn-primary my-3" href="/agent">Agent</a>
+  <a class="btn btn-primary my-3" href="/">Dashboard</a>
+  <a class="btn btn-primary my-3" href="/customer">Customer Information</a>
+  <a class="btn btn-primary my-3" href="/kb">Knowledge Based</a>
+  <a class="btn btn-primary my-3" href="/agent">Agent</a>
+  <button class="btn btn-primary my-3" onclick="logout()">Logout</button>
     <table id="customerTable">
       <thead>
         <tr>
@@ -35,6 +38,32 @@
   </div>
 
   <script>
+      function logout() {
+        try {
+          const token = localStorage.getItem('jwtToken');
+          if (token) {
+            fetch('/auth/logout', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+              },
+              body: JSON.stringify({})
+            })
+            .then(response => {
+              if (!response.ok) {
+                const err = response.json();
+                throw new Error(err.message || 'Login failed. Please check your credentials.');
+              }
+            });
+          }
+        } catch (error) {
+          console.log(error);
+          alert(error);
+        }
+        localStorage.setItem('jwtToken', '');
+        location.reload(true);
+      }
     document.addEventListener("DOMContentLoaded", async function () {
       try {
         const token = localStorage.getItem('jwtToken');

@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
   "libraries/adk_utils",
+  "libraries/agent", 
   "libraries/app_state",
   "libraries/config",
   "libraries/cryptography",
@@ -14,7 +15,7 @@ members = [
   "libraries/tools",
   "services/agent_cli",
   "services/web",
-  "services/mcp",   
+  "services/mcp", 
 ]
 
 [workspace.package]
@@ -79,6 +80,7 @@ rmcp09 = { package = "rmcp", version = "0.9.1", features = ["client", "reqwest",
 
 # Internal Libraries
 app_adk_utils = { path = "./libraries/adk_utils", package = "adk_utils" }
+app_agent = { path = "./libraries/agent", package = "agent" }
 app_config = { path = "./libraries/config", package = "config" }
 app_cryptography = { path = "./libraries/cryptography", package = "cryptography" }
 app_dto = { path = "./libraries/dto", package = "dto" }

@@ -1,5 +1,5 @@
+use app_config::AppConfig;
 use app_error::AppError;
-use app_state::AppState;
 use reqwest::{Client, header};
 use serde::{Deserialize, Serialize};
 
@@ -19,8 +19,7 @@ pub struct EmbeddingData {
     pub embedding: Vec<f32>,
 }
 
-pub async fn embedding(state: &AppState, input: &str) -> Result<Vec<f32>, AppError> {
-    let config = state.config.clone();
+pub async fn embedding(config: &AppConfig, input: &str) -> Result<Vec<f32>, AppError> {
     let url = format!("{}/embeddings", &config.rag_base_url.trim_end_matches('/'));
     let req = EmbeddingsRequest {
         model: &config.rag_model,

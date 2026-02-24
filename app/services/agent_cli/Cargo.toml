@@ -5,6 +5,7 @@ edition.workspace = true
 
 [dependencies]
 sqlx = { workspace = true }
+uuid = { workspace = true }
 tokio = { workspace = true }
 anyhow = { workspace = true }
 dotenv = { workspace = true }
@@ -17,6 +18,7 @@ adk-core  = { workspace = true }
 adk-cli   = { workspace = true }
 adk-model = { workspace = true }
 adk-rust  = { workspace = true }
+app_agent = { workspace = true }
 adk-runner = { workspace = true }
 app_config = { workspace = true }
 serde_json = { workspace = true }

@@ -82,7 +82,7 @@ impl CustomerTools {
 
         for customer in customers.into_iter() {
             let content_embd = embedding(
-                &self.state,
+                &self.state.config,
                 &format!("{} {}", &customer.first_name, &customer.last_name),
             )
             .await

@@ -10,61 +10,64 @@
   <script src="/assets/datatables.min.js"></script>
 </head>
 <body>
-  <h1>Welcome</h1>
-  <a class="btn btn-primary my-3" href="/customer">Customer Information</a>
-  <a class="btn btn-primary my-3" href="/kb">Knowledge Based</a>
-  <a class="btn btn-primary my-3" href="/agent">Agent</a>
-  <button class="btn btn-primary my-3" onclick="logout()">Logout</button>
-  <script>
-    function logout() {
-      try {
-        const token = localStorage.getItem('jwtToken');
-        if (token) {
-          fetch('/auth/logout', {
+  <div class="container">
+    <h1>Dashboard</h1>
+    <a class="btn btn-primary my-3" href="/">Dashboard</a>
+    <a class="btn btn-primary my-3" href="/customer">Customer Information</a>
+    <a class="btn btn-primary my-3" href="/kb">Knowledge Based</a>
+    <a class="btn btn-primary my-3" href="/agent">Agent</a>
+    <button class="btn btn-primary my-3" onclick="logout()">Logout</button>
+    <script>
+      function logout() {
+        try {
+          const token = localStorage.getItem('jwtToken');
+          if (token) {
+            fetch('/auth/logout', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+              },
+              body: JSON.stringify({})
+            })
+            .then(response => {
+              if (!response.ok) {
+                const err = response.json();
+                throw new Error(err.message || 'Login failed. Please check your credentials.');
+              }
+            });
+          }
+        } catch (error) {
+          console.log(error);
+          alert(error);
+        }
+        localStorage.setItem('jwtToken', '');
+        location.reload(true);
+      }
+      document.addEventListener("DOMContentLoaded", async function () {
+        try {
+          const token = localStorage.getItem('jwtToken');
+          if (token === null) {
+            throw new Error("Token not found!");
+          }
+        
+          const response = await fetch('/auth/ping', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,
+              'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({})
-          })
-          .then(response => {
-            if (!response.ok) {
-              const err = response.json();
-              throw new Error(err.message || 'Login failed. Please check your credentials.');
-            }
           });
-        }
-      } catch (error) {
-        console.log(error);
-        alert(error);
-      }
-      localStorage.setItem('jwtToken', '');
-      location.reload(true);
-    }
-    document.addEventListener("DOMContentLoaded", async function () {
-      try {
-        const token = localStorage.getItem('jwtToken');
-        if (token === null) {
-          throw new Error("Token not found!");
-        }
-        
-        const response = await fetch('/auth/ping', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-        });
 
-        if (!response.ok) {
-            throw new Error('Login failed');
+          if (!response.ok) {
+              throw new Error('Login failed');
+          }
+        } catch (error) {
+          console.log(error);
+          window.location = "/login";
         }
-      } catch (error) {
-        console.log(error);
-        window.location = "/login";
-      }
-    });
-  </script>
+      });
+    </script>
+  </div>
 </body>
 </html>
