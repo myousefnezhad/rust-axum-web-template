@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Agent Demo: Customer</title>
+  <link href="/assets/bootstrap.min.css" rel="stylesheet">
+  <link href="/assets/datatables.min.css" rel="stylesheet">
+  <script src="/assets/jquery.js"></script>
+  <script src="/assets/bootstrap.min.js"></script>
+  <script src="/assets/datatables.min.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Knowledge Based</h1>
+    <a class="btn btn-primary my-3" href="/customer">Customer Information</a>
+    <a class="btn btn-primary my-3" href="/agent">Agent</a>
+    <table id="kbTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Chunk</th>
+          <th>Created At</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async function () {
+      try {
+        const token = localStorage.getItem('jwtToken');
+        if (token === null) {
+          throw new Error("Token not found!");
+        }
+        
+        const response = await fetch('/auth/kb', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+        });
+        if (!response.ok) {
+          throw new Error('Cannot load data');
+        }
+        const customers = await response.json();
+
+        const tbody = document.querySelector("#kbTable tbody");
+        tbody.innerHTML = ""; // Clear old rows
+
+
+        customers.forEach(c => {
+          const tr = document.createElement("tr");
+
+          tr.innerHTML = `
+                <td class="text-start">${c.id}</td>
+                <td>${c.chunk}</td>
+                <td>${c.created_at}</td>
+            `;
+
+          tbody.appendChild(tr);
+        });
+        new DataTable('#kbTable');
+
+
+      } catch (error) {
+        console.log(error);
+        alert(error);
+        window.location = "/login";
+      }
+    });
+  </script>
+</body>
+
+</html>

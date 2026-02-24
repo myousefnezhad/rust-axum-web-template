@@ -7,12 +7,16 @@ use std::{env, fs};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AppConfig {
     pub backend_bind: String, // 0.0.0.0:9000
+    pub asset_path: String,
     pub mcp_bind: String,     // 0.0.0.0:9001
     pub mcp_token: String,    // <TOKEN>
     pub mcp_base_url: String, // For Agent Cli
     pub llm_base_url: String,
     pub llm_token: String,
     pub llm_model: String,
+    pub rag_base_url: String,
+    pub rag_token: String,
+    pub rag_model: String,
     pub log_level: LogLevel, // Debug, Info, Warn, Error, Trace
     pub pg_connection: usize,
     pub redis_url: String,  // redis://127.0.0.1:6379

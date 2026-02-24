@@ -60,15 +60,8 @@ impl CounterTools {
         &self,
         ctx_req: RequestContext<RoleServer>,
     ) -> Result<Json<CounterResult>, McpError> {
-        // This is example of how access to adk information in MCP
-        let tool_name = ctx_req
-            .meta
-            .get("__adk_tool_name")
-            .and_then(|v| v.as_str())
-            .unwrap_or("unknown");
         let tool_args = ctx_req.meta.get("__adk_tool_args").cloned();
         let adk = AdkInjectContext::extract_adk_context(tool_args);
-        debug!("tool_name={tool_name}");
         debug!("tool_args={adk:#?}");
         let mut counter = self.counter.lock().await;
         *counter += 1;

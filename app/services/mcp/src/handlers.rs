@@ -42,7 +42,7 @@ impl ServerHandler for McpHandler {
 
     async fn initialize(
         &self,
-        _req: InitializeRequestParam,
+        _req: InitializeRequestParams,
         _ctx: RequestContext<RoleServer>,
     ) -> Result<InitializeResult, McpError> {
         Ok(self.get_info())
@@ -50,47 +50,29 @@ impl ServerHandler for McpHandler {
 
     async fn list_tools(
         &self,
-        _req: Option<PaginatedRequestParam>,
+        _req: Option<PaginatedRequestParams>,
         _ctx: RequestContext<RoleServer>,
     ) -> Result<ListToolsResult, McpError> {
         let mut tools = Vec::new();
         // Counter Tools
         for t in self.counter.tool_router.list_all() {
             tools.push(Tool {
-                name: t.name,
-                description: t.description,
-                input_schema: t.input_schema,
-                annotations: None,
-                icons: None,
-                meta: None,
                 output_schema: None,
-                title: None,
+                ..t
             });
         }
         // Calculator Tools
         for t in self.calculator.tool_router.list_all() {
             tools.push(Tool {
-                name: t.name,
-                description: t.description,
-                input_schema: t.input_schema,
-                annotations: None,
-                icons: None,
-                meta: None,
                 output_schema: None,
-                title: None,
+                ..t
             });
         }
         // User Tools
         for t in self.user.tool_router.list_all() {
             tools.push(Tool {
-                name: t.name,
-                description: t.description,
-                input_schema: t.input_schema,
-                annotations: None,
-                icons: None,
-                meta: None,
                 output_schema: None,
-                title: None,
+                ..t
             });
         }
         Ok(ListToolsResult {
@@ -102,7 +84,7 @@ impl ServerHandler for McpHandler {
 
     async fn call_tool(
         &self,
-        req: CallToolRequestParam,
+        req: CallToolRequestParams,
         mut ctx: RequestContext<RoleServer>,
     ) -> Result<CallToolResult, McpError> {
         ctx.meta.insert(
@@ -152,7 +134,7 @@ impl ServerHandler for McpHandler {
 
     async fn list_prompts(
         &self,
-        _req: Option<PaginatedRequestParam>,
+        _req: Option<PaginatedRequestParams>,
         _ctx: RequestContext<RoleServer>,
     ) -> Result<ListPromptsResult, McpError> {
         // 1. Get Counter Prompts
@@ -186,7 +168,7 @@ impl ServerHandler for McpHandler {
 
     async fn get_prompt(
         &self,
-        req: GetPromptRequestParam,
+        req: GetPromptRequestParams,
         ctx: RequestContext<RoleServer>,
     ) -> Result<GetPromptResult, McpError> {
         // 1. Check if Counter has this prompt
@@ -211,7 +193,7 @@ impl ServerHandler for McpHandler {
 
     async fn list_resources(
         &self,
-        _req: Option<PaginatedRequestParam>,
+        _req: Option<PaginatedRequestParams>,
         _ctx: RequestContext<RoleServer>,
     ) -> Result<ListResourcesResult, McpError> {
         let resources = self.counter.list_my_resources().await;
@@ -224,7 +206,7 @@ impl ServerHandler for McpHandler {
 
     async fn read_resource(
         &self,
-        req: ReadResourceRequestParam,
+        req: ReadResourceRequestParams,
         _ctx: RequestContext<RoleServer>,
     ) -> Result<ReadResourceResult, McpError> {
         let content = self.counter.read_my_resource(&req.uri).await?;

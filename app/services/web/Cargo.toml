@@ -35,3 +35,6 @@ app_middleware = { workspace = true }
 http-body-util = { workspace = true }
 app_cryptography = { workspace = true }
 tracing-subscriber = { workspace = true }
+adk-rust = { workspace = true }
+adk-core = { workspace = true }
+uuid = { workspace = true }

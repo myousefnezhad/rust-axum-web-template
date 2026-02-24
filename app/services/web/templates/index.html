@@ -1,7 +1,20 @@
 <html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Agent Demo: Dashboard</title>
+  <link href="/assets/bootstrap.min.css" rel="stylesheet">
+  <link href="/assets/datatables.min.css" rel="stylesheet">
+  <script src="/assets/jquery.js"></script>
+  <script src="/assets/bootstrap.min.js"></script>
+  <script src="/assets/datatables.min.js"></script>
+</head>
 <body>
   <h1>Welcome</h1>
-  <button onclick="logout()">Logout</button>
+  <a class="btn btn-primary my-3" href="/customer">Customer Information</a>
+  <a class="btn btn-primary my-3" href="/kb">Knowledge Based</a>
+  <a class="btn btn-primary my-3" href="/agent">Agent</a>
+  <button class="btn btn-primary my-3" onclick="logout()">Logout</button>
   <script>
     function logout() {
       try {
