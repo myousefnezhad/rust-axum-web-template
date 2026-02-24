@@ -1,3 +1,5 @@
+This repo is archived. Please refer to [here](https://github.com/myousefnezhad/application-templates) for more up to date examples.
+
 Rust + Axum Web Template (Auth + Postgres + Redis + MCP)
 =========================
 A clean, production-minded starter template for building web APIs with Rust and Axum.
