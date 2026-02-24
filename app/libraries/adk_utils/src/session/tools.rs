@@ -1,8 +1,12 @@
 use adk_rust::prelude::*;
 use async_trait::async_trait;
+use rmcp::{RoleServer, service::RequestContext};
 use serde::Deserialize;
 use serde_json::{Map, Value, from_value, json};
 use std::sync::Arc;
+
+pub const ADK_TOOL_ARGS: &'static str = "__adk_tool_args";
+pub const ADK_TOOL_PERFIX: &'static str = "_adk";
 
 #[derive(Debug, Default, Deserialize)]
 pub struct AdkInjectContext {
@@ -15,15 +19,14 @@ pub struct AdkInjectContext {
 }
 
 impl AdkInjectContext {
-    pub fn extract_adk_context(tool_args: Option<Value>) -> Option<Self> {
+    pub fn extract_adk_context(ctx: &RequestContext<RoleServer>) -> Option<Self> {
         // If no tool_args → return empty struct
-        let args = match tool_args {
+        let args = match ctx.meta.get(ADK_TOOL_ARGS) {
             Some(Value::Object(map)) => map,
             _ => return None,
         };
-
         // If no "_adk" field → return empty struct
-        let adk_val = match args.get("_adk") {
+        let adk_val = match args.get(ADK_TOOL_PERFIX) {
             Some(val) => val.clone(),
             None => return None,
         };
@@ -69,10 +72,9 @@ impl Tool for AdkInjectSessionTool {
 
     async fn execute(&self, ctx: Arc<dyn ToolContext>, args: Value) -> Result<Value> {
         let mut obj = ensure_object(args);
-
         // Pull identity directly from ToolContext
         obj.insert(
-            "_adk".to_string(),
+            ADK_TOOL_PERFIX.to_string(),
             json!({
                 "app_name": ctx.app_name(),
                 "user_id": ctx.user_id(),
@@ -82,7 +84,6 @@ impl Tool for AdkInjectSessionTool {
                 "branch": ctx.branch(),
             }),
         );
-
         self.inner.execute(ctx, Value::Object(obj)).await
     }
 }

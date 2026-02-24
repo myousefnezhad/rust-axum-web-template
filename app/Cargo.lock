@@ -449,6 +449,7 @@ dependencies = [
  "adk-session",
  "async-trait",
  "chrono",
+ "rmcp 0.16.0",
  "serde",
  "serde_json",
  "sqlx",
