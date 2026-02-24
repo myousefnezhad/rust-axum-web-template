@@ -35,4 +35,5 @@ async-trait = { workspace = true }
 app_middleware = { workspace = true }
 http-body-util = { workspace = true }
 app_cryptography = { workspace = true }
+app_llama_cpp = { workspace = true }
 tracing-subscriber = { workspace = true }

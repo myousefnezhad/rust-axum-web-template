@@ -89,3 +89,4 @@ app_middleware = { path = "./libraries/middleware", package = "middleware" }
 app_redis = { path = "./libraries/redis", package = "redis" }
 app_schema = { path = "./libraries/schema", package = "schema" }
 app_tools = { path = "./libraries/tools", package = "tools" }
+app_llama_cpp = { path = "./libraries/llama_cpp", package = "llama_cpp" }

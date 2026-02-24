@@ -1,5 +1,5 @@
 [package]
-name = "tools"
+name = "llama_cpp"
 version.workspace = true
 edition.workspace = true
 
@@ -31,9 +31,7 @@ hyper-util = { workspace = true }
 tokio-util = { workspace = true }
 rmcp-macros = { workspace = true }
 async-trait = { workspace = true }
-app_adk_utils = { workspace = true }
-app_middleware = { workspace = true }
 http-body-util = { workspace = true }
 app_cryptography = { workspace = true }
 tracing-subscriber = { workspace = true }
-app_llama_cpp = { workspace = true }
+reqwest = { workspace = true }

@@ -1,5 +1,8 @@
 use app_state::AppState;
-use app_tools::{calculator::CalculatorTools, counter::CounterTools, users::UserTools};
+use app_tools::{
+    calculator::CalculatorTools, counter::CounterTools, customer::CustomerTools, rag::RagTools,
+    users::UserTools,
+};
 use rmcp::{
     ErrorData as McpError, RoleServer, ServerHandler,
     handler::server::{prompt::PromptContext, tool::ToolCallContext},
@@ -11,16 +14,20 @@ use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct McpHandler {
-    counter: CounterTools,
     calculator: CalculatorTools,
+    counter: CounterTools,
+    customer: CustomerTools,
+    rag: RagTools,
     user: UserTools,
 }
 
 impl McpHandler {
     pub fn new(state: Arc<AppState>) -> Self {
         Self {
-            counter: CounterTools::new(state.clone()),
             calculator: CalculatorTools::new(),
+            counter: CounterTools::new(state.clone()),
+            customer: CustomerTools::new(state.clone()),
+            rag: RagTools::new(state.clone()),
             user: UserTools::new(state.clone()),
         }
     }
@@ -54,6 +61,13 @@ impl ServerHandler for McpHandler {
         _ctx: RequestContext<RoleServer>,
     ) -> Result<ListToolsResult, McpError> {
         let mut tools = Vec::new();
+        // Calculator Tools
+        for t in self.calculator.tool_router.list_all() {
+            tools.push(Tool {
+                output_schema: None,
+                ..t
+            });
+        }
         // Counter Tools
         for t in self.counter.tool_router.list_all() {
             tools.push(Tool {
@@ -61,8 +75,15 @@ impl ServerHandler for McpHandler {
                 ..t
             });
         }
-        // Calculator Tools
-        for t in self.calculator.tool_router.list_all() {
+        // Customer Tools
+        for t in self.customer.tool_router.list_all() {
+            tools.push(Tool {
+                output_schema: None,
+                ..t
+            });
+        }
+        // Rag Tools
+        for t in self.rag.tool_router.list_all() {
             tools.push(Tool {
                 output_schema: None,
                 ..t
@@ -95,6 +116,16 @@ impl ServerHandler for McpHandler {
             "__adk_tool_args".into(),
             JsonValue::Object(req.arguments.clone().unwrap_or_default()),
         );
+        // Check if Calculator owns this tool
+        if self.calculator.tool_router.has_route(&req.name) {
+            let calc_ctx = ToolCallContext::new(
+                &self.calculator,
+                req, // Move req here
+                ctx,
+            );
+            return self.calculator.tool_router.call(calc_ctx).await;
+        }
+
         // Check if Counter owns this tool
         if self.counter.tool_router.has_route(&req.name) {
             let counter_ctx = ToolCallContext::new(
@@ -105,14 +136,23 @@ impl ServerHandler for McpHandler {
             return self.counter.tool_router.call(counter_ctx).await;
         }
 
-        // Check if Calculator owns this tool
-        if self.calculator.tool_router.has_route(&req.name) {
-            let calc_ctx = ToolCallContext::new(
-                &self.calculator,
-                req, // Move req here
+        // Check if Customer owns this tool
+        if self.customer.tool_router.has_route(&req.name) {
+            let customer_ctx = ToolCallContext::new(
+                &self.customer,
+                req, // Move req here since we are returning immediately
                 ctx,
             );
-            return self.calculator.tool_router.call(calc_ctx).await;
+            return self.customer.tool_router.call(customer_ctx).await;
+        }
+
+        // Check if Rag owns this tool
+        if self.rag.tool_router.has_route(&req.name) {
+            let rag_ctx = ToolCallContext::new(
+                &self.rag, req, // Move req here
+                ctx,
+            );
+            return self.rag.tool_router.call(rag_ctx).await;
         }
 
         // Check if User owns this tool
